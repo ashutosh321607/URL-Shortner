@@ -1,0 +1,15 @@
+div{
+  margin-top: 5vh;
+  /* max-width: 300px; */
+}
+
+mat-card {
+  background-color: lightgray;
+  padding: 0 0 0 0;
+  display: flex;
+  align-items: center;
+}
+
+span {
+  margin: 0 5px;
+}
