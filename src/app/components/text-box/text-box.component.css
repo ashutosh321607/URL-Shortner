@@ -18,3 +18,7 @@
   position: relative;
   vertical-align: top;
 }
+
+mat-slide-toggle {
+  margin: 5px 0;
+}
