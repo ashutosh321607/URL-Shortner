@@ -1,41 +1,45 @@
-<form class="example-form">
-  <div>
-    <mat-slide-toggle color="primary" (change)="changed()">
-      Custom URL
-    </mat-slide-toggle>
-    <mat-form-field class="example-full-width" appearance="fill">
-      <mat-label>URL</mat-label>
-      <input
-        type="url"
-        matInput
-        [formControl]="emailFormControl"
-        [errorStateMatcher]="matcher"
-        placeholder="Ex. google.com"
-      />
-      <mat-error
-        *ngIf="
-          emailFormControl.hasError('email') &&
-          !emailFormControl.hasError('required')
-        "
+<div class="center">
+  <form class="example-form">
+    <div>
+      <mat-slide-toggle color="primary" (change)="changed()">
+        Custom URL
+      </mat-slide-toggle>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>URL</mat-label>
+        <input
+          type="url"
+          matInput
+          [formControl]="emailFormControl"
+          [errorStateMatcher]="matcher"
+          placeholder="Ex. google.com"
+        />
+        <mat-error
+          *ngIf="
+            emailFormControl.hasError('email') &&
+            !emailFormControl.hasError('required')
+          "
+        >
+          Please enter a valid URL
+        </mat-error>
+        <mat-error *ngIf="emailFormControl.hasError('required')">
+          URL is <strong>required</strong>
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field
+        class="example-full-width"
+        appearance="fill"
+        *ngIf="this.isChecked"
       >
-        Please enter a valid URL
-      </mat-error>
-      <mat-error *ngIf="emailFormControl.hasError('required')">
-        URL is <strong>required</strong>
-      </mat-error>
-    </mat-form-field>
+        <mat-label>Custom URL</mat-label>
+        <input type="url" matInput placeholder="Ex. 1234" [required]="false" />
+      </mat-form-field>
 
-    <mat-form-field
-      class="example-full-width"
-      appearance="fill"
-      *ngIf="this.isChecked"
-    >
-      <mat-label>Custom URL</mat-label>
-      <input type="url" matInput placeholder="Ex. 1234" [required]="false" />
-    </mat-form-field>
-
-    <div class="button">
-      <button mat-raised-button color="primary">Shorten</button>
+      <div class="button">
+        <button mat-raised-button color="primary">Shorten</button>
+      </div>
     </div>
-  </div>
-</form>
+  </form>
+
+  <app-clipboard></app-clipboard>
+</div>

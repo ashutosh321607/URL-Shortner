@@ -17,6 +17,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { SignupComponent } from './components/signup/signup.component';
 import { SigninComponent } from './components/signin/signin.component';
+import { LandingPageComponent } from './components/landing-page/landing-page.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -24,7 +25,8 @@ import { SigninComponent } from './components/signin/signin.component';
     HeaderComponent,
     ClipboardComponent,
     SignupComponent,
-    SigninComponent
+    SigninComponent,
+    LandingPageComponent
   ],
   imports: [
     BrowserModule,
