@@ -15,12 +15,16 @@ import { ClipboardComponent } from './components/clipboard/clipboard.component';
 import {ClipboardModule} from '@angular/cdk/clipboard';
 import {MatCardModule} from '@angular/material/card';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { SignupComponent } from './components/signup/signup.component';
+import { SigninComponent } from './components/signin/signin.component';
 @NgModule({
   declarations: [
     AppComponent,
     TextBoxComponent,
     HeaderComponent,
-    ClipboardComponent
+    ClipboardComponent,
+    SignupComponent,
+    SigninComponent
   ],
   imports: [
     BrowserModule,
