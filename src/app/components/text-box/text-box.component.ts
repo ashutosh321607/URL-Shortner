@@ -21,6 +21,8 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
 
 export class TextBoxComponent implements OnInit {
   isChecked = false;
+  urlReg = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
+
   changed(){
     this.isChecked = !this.isChecked;
   }
@@ -31,8 +33,8 @@ export class TextBoxComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  
-  emailFormControl = new FormControl('', [Validators.required, Validators.email]);
+  urlFormControl = new FormControl('', [Validators.required, Validators.pattern(this.urlReg)]);
+  customUrlFormControl = new FormControl('', [Validators.required, Validators.pattern(this.urlReg)]);
   
   matcher = new MyErrorStateMatcher();
 }
