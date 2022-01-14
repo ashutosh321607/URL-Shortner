@@ -1,1 +1,25 @@
-<p>signup works!</p>
+<div class='form-wrapper'>
+<form class="signup-form">
+  <h1>URL Shortener</h1>
+  <h2>Sign Up </h2>
+    <mat-form-field class="signup-input-full-width">
+      <input matInput placeholder="Email" [formControl]="emailFormControl">
+      <mat-error *ngIf="emailFormControl.hasError('email') && !emailFormControl.hasError('required')">
+        Please enter a valid email address
+      </mat-error>
+      <mat-error *ngIf="emailFormControl.hasError('required')">
+        Email is <strong>required</strong>
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field class="signup-input-full-width">
+        <input matInput placeholder="Full Name" >
+    </mat-form-field>
+    <mat-form-field class="signup-input-full-width">
+        <input matInput type='password' placeholder="Create Password" >
+    </mat-form-field>
+    <mat-form-field class="signup-input-full-width">
+        <input matInput type='password' placeholder="Confirm Password" >
+    </mat-form-field>
+    <button mat-raised-button color="primary">Sign Up</button>
+  </form>
+</div>
