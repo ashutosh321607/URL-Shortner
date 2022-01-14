@@ -12,12 +12,24 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ClipboardComponent } from './components/clipboard/clipboard.component';
-import {ClipboardModule} from '@angular/cdk/clipboard';
-import {MatCardModule} from '@angular/material/card';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { MatCardModule } from '@angular/material/card';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SignupComponent } from './components/signup/signup.component';
 import { SigninComponent } from './components/signin/signin.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
+import Amplify, { Auth } from 'aws-amplify';
+
+Amplify.configure({
+  Auth: {
+    mandatorySignIn: true,
+    region: 'us-east-1',
+    userPoolId: 'YOUR_USER_POOL_ID',
+    userPoolWebClientId: 'YOUR_WEB_CLIENT_ID',
+    authenticationFlowType: 'USER_PASSWORD_AUTH',
+  },
+});
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,7 +38,7 @@ import { LandingPageComponent } from './components/landing-page/landing-page.com
     ClipboardComponent,
     SignupComponent,
     SigninComponent,
-    LandingPageComponent
+    LandingPageComponent,
   ],
   imports: [
     BrowserModule,
@@ -41,9 +53,9 @@ import { LandingPageComponent } from './components/landing-page/landing-page.com
     ReactiveFormsModule,
     ClipboardModule,
     MatCardModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
