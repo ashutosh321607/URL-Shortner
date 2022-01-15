@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form Submission Confirmation</title>
+</head>
+<body>
+Thanks for submitting the form. You can return to dashboard by clicking <form action="{{url_for ('profile') }}" method="post"><input type="hidden" name="username" value={{ username }}> <input type="hidden" name="password" value={{ password }}> <button type="submit">here</button> </form>.
+</body>
+</html>

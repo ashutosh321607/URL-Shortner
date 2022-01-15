@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <title>Hello {{ username }}</title>
+  </head>
+  <body>
+  <table>
+    <thead>
+      <tr>
+        <td>Original</td>
+        <td>Shortened</td>
+      </tr>
+    </thead>
+    <tbody>
+    {% for user in user_data %}
+    <tr>
+      <td>{{ user.original_url }}</td>
+      <td>{{ user.shorten_url }}</td>
+    </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+      <form action="{{ url_for ('confirm')}}" method="post">
+          <h5>Enter the url details</h5>
+          <div>
+              <input type="text" name="original_url" placeholder="original_url" required>
+          </div>
+          <div>
+              <input type="datetime-local" name="expiry_time" placeholder="expire_time">
+          </div>
+          <div>
+              <select id="personalized" name="personalized">
+                <option value="True">True</option>
+                <option value="False">False</option>
+              </select>
+          </div>
+          <div>
+            <input type="hidden" name="username" value={{ username }}>
+          </div>
+          <div>
+            <input type="hidden" name="password" value={{ password }}>
+          </div>>
+          <div>
+              <button >Submit</button>
+          </div>
+      </form>
+  </body>
+
+</html>
