@@ -34,9 +34,12 @@ export class TextBoxComponent implements OnInit {
   ngOnInit(): void {
   }
   urlFormControl = new FormControl('', [Validators.required, Validators.pattern(this.urlReg)]);
-  customUrlFormControl = new FormControl('', [Validators.required, Validators.pattern(this.urlReg)]);
   
   matcher = new MyErrorStateMatcher();
+
+  onShorten(){
+    console.log(this.data);
+  }
 }
 
 

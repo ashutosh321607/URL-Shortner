@@ -12,6 +12,7 @@
           [formControl]="urlFormControl"
           placeholder="Ex. google.com"
           [(ngModel)]="data.originalUrl"
+          name="originalUrl"
         />
         <mat-error
           *ngIf="
@@ -31,24 +32,14 @@
         *ngIf="this.isChecked"
       >
         <mat-label>Custom URL</mat-label>
-        <input type="url" matInput placeholder="Ex. xyz" [required]="false" [formControl]="customUrlFormControl" [(ngModel)]="data.customUrl"/>
-        <mat-error
-          *ngIf="
-            customUrlFormControl.hasError('pattern') &&
-            !customUrlFormControl.hasError('required')"
-        >
-          Please enter a valid URL
-        </mat-error>
-        <mat-error *ngIf="customUrlFormControl.hasError('required')">
-          URL is <strong>required</strong>
-        </mat-error>
+        <input type="url" matInput placeholder="Ex. xyz" [required]="false" [(ngModel)]="data.customUrl" name="customUrl"/>
       </mat-form-field>
 
       <div class="button">
-        <button mat-raised-button color="primary">Shorten</button>
+        <button mat-raised-button color="primary" (click)="onShorten()">Shorten</button>
       </div>
     </div>
-  </form>
+  </form> 
 
   <app-clipboard></app-clipboard>
 </div>
