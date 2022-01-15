@@ -1,18 +1,21 @@
 from flask import Flask, render_template, request, flash
 from flask_sqlalchemy import SQLAlchemy
 import datetime
+from utils import *
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user_milind:password@localhost/db_testlearn'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cs559:password@localhost/db_testlearn'
 db = SQLAlchemy(app)
 
-
-def convert_to_python_datetime(date_in):
-  date_processing = date_in.replace('T', '-').replace(':', '-').split('-')
-  date_processing = [int(v) for v in date_processing]
-  date_out = datetime.datetime(*date_processing)
-  return date_out
-
+def get_shortan_url(url):
+  short_url = get_random_url()
+ 
+  # check short_url is not already in the database
+  while URLTable.query.filter_by(shorten_url=short_url).first() is not None:
+     short_url = get_random_url()
+  
+  return short_url
+  
 class URLTable(db.Model):
   __table_name__ ='urltable'
   # id = db.Column(db.Integer, primary_key=True)
@@ -70,7 +73,7 @@ def confirm():
         personalized = False
       else:
         personalized = True
-    shorten_url = "temporary123456789"
+    shorten_url = get_shortan_url(original_url)
     created_time = datetime.datetime.now()
     entry = URLTable(user_id=username, original_url=original_url, expire_time=expiry_time, created_time=created_time,
                       shorten_url=shorten_url, personalized=personalized)
