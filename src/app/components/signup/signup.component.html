@@ -1,24 +1,56 @@
-<div class='form-wrapper'>
-<form class="signup-form">
-  <h2>Sign Up </h2>
+<div class="form-wrapper">
+  <form class="signup-form">
+    <h2>Sign Up</h2>
     <mat-form-field class="signup-input-full-width">
-      <input matInput placeholder="Email" [formControl]="emailFormControl">
-      <mat-error *ngIf="emailFormControl.hasError('email') && !emailFormControl.hasError('required')">
+      <input
+        matInput
+        placeholder="Email"
+        [formControl]="emailFormControl"
+        name="email"
+        [(ngModel)]="email"
+      />
+      <mat-error
+        *ngIf="
+          emailFormControl.hasError('email') &&
+          !emailFormControl.hasError('required')
+        "
+      >
         Please enter a valid email address
       </mat-error>
       <mat-error *ngIf="emailFormControl.hasError('required')">
         Email is <strong>required</strong>
       </mat-error>
     </mat-form-field>
+
     <mat-form-field class="signup-input-full-width">
-        <input matInput placeholder="Full Name" >
-    </mat-form-field> 
-    <mat-form-field class="signup-input-full-width">
-        <input matInput type='password' placeholder="Create Password" >
+      <input matInput placeholder="Full Name" name="name" [(ngModel)]="name" />
     </mat-form-field>
+
     <mat-form-field class="signup-input-full-width">
-        <input matInput type='password' placeholder="Confirm Password" >
+      <input
+        matInput
+        type="password"
+        placeholder="Create Password"
+        name="password"
+        [(ngModel)]="password"
+        )]
+      />
     </mat-form-field>
+
+    <mat-form-field class="signup-input-full-width">
+      <input
+        matInput
+        type="password"
+        placeholder="Confirm Password"
+        name="confirm password"
+        [(ngModel)]="confirm_password"
+        )]
+      />
+      <mat-error *ngIf="confirm_password !== password">
+        Passwords do not match
+      </mat-error>
+    </mat-form-field>
+
     <button mat-raised-button color="primary">Sign Up</button>
   </form>
 </div>

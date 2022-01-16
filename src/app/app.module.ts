@@ -23,10 +23,10 @@ import Amplify, { Auth } from 'aws-amplify';
 Amplify.configure({
   Auth: {
     mandatorySignIn: true,
-    region: 'us-east-1',
-    userPoolId: 'YOUR_USER_POOL_ID',
-    userPoolWebClientId: 'YOUR_WEB_CLIENT_ID',
-    authenticationFlowType: 'USER_PASSWORD_AUTH',
+    region: 'ap-south-1',
+    userPoolId: 'ap-south-1_dtuSSUhxg',
+    userPoolWebClientId: '67q3k6h8j5uq31r5ouicsel9b1',
+    authenticationFlowType: 'ALLOW_REFRESH_TOKEN_AUTH',
   },
 });
 
