@@ -12,7 +12,7 @@ api = Api(app)
 
 ERROR_404_NOT_FOUND_PAGE_URL = "localhost:4200/404"
 
-
+# function to generate a random short url 
 def generate_shorten_url():
   short_url = get_random_url()
   # check short_url is not already in the database
@@ -20,16 +20,21 @@ def generate_shorten_url():
     short_url = get_random_url()
   return  short_url
 
+# funciton get shorten url for a url given by user
 def get_shorten_url(url, personalized, username):
-  ## check if url exists and personalized is False
+  ## check personalized is False
   if not personalized:
+    # check if url exists
     data_original_urls = URLTable.query.filter_by(original_url=url).all()
+    
+    # if the url exist, we return a previously shortened url which is not created with personalised = True 
     if data_original_urls != []:
         for row in data_original_urls:
           if row.personalized == False:
             short_url = row.shorten_url
             return short_url
     short_url = generate_shorten_url()
+    # else generate a new url
   else:
     user_urls = URLTable.query.filter_by(original_url = url, user_id = username).all()
     if user_urls != []:
@@ -37,11 +42,11 @@ def get_shorten_url(url, personalized, username):
     short_url = generate_shorten_url()
   return short_url
 
+# function to get original url from the database
 def get_original_url_from_shorten_url(shorten_url):
-  # get original url from the database
   return URLTable.query.filter_by(shorten_url=shorten_url).first().original_url
 
-
+# function to check if given short url is already in the database
 def isAvailableShortenUrl(url):
   return URLTable.query.filter_by(shorten_url=url).first() is None
 

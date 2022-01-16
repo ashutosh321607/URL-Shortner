@@ -1,8 +1,8 @@
 import random
 import datetime
 
-def get_random_url():
-    # generate a random string of length 6 with characters from a-zA-Z0-9
+# function to generate a random string of length 6 with characters from a-zA-Z0-9
+def get_random_url():  
     possible_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     random_url = "".join(random.choice(possible_characters) for i in range(6))
     return f"{random_url}"
