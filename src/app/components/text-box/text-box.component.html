@@ -41,5 +41,5 @@
     </div>
   </form> 
 
-  <app-clipboard></app-clipboard>
+  <app-clipboard [value]="this.shortUrl" *ngIf="this.shortUrl"></app-clipboard>
 </div>

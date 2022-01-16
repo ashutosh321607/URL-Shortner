@@ -1,13 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import {FormControl, FormGroupDirective, NgForm, Validators} from '@angular/forms';
-import {ErrorStateMatcher} from '@angular/material/core';
+import {
+  FormControl,
+  FormGroupDirective,
+  NgForm,
+  Validators,
+} from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { NgModule } from '@angular/core';
+import { HandleApiService } from 'src/app/services/handle-api.service';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+  isErrorState(
+    control: FormControl | null,
+    form: FormGroupDirective | NgForm | null
+  ): boolean {
     const isSubmitted = form && form.submitted;
-    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+    return !!(
+      control &&
+      control.invalid &&
+      (control.dirty || control.touched || isSubmitted)
+    );
   }
 }
 
@@ -15,37 +28,38 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
 @Component({
   selector: 'app-text-box',
   templateUrl: './text-box.component.html',
-  styleUrls: ['./text-box.component.css']
+  styleUrls: ['./text-box.component.css'],
 })
-
-
 export class TextBoxComponent implements OnInit {
   isChecked = false;
   urlReg = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
-
-  changed(){
+  shortUrl: string = '';
+  changed() {
     this.isChecked = !this.isChecked;
   }
-  data: URLData = new URLData();
+  public data: URLData = new URLData("", "");
 
-  constructor() { 
-  }
+  constructor(public apiService: HandleApiService) {}
 
-  ngOnInit(): void {
-  }
-  urlFormControl = new FormControl('', [Validators.required, Validators.pattern(this.urlReg)]);
-  
+  ngOnInit(): void {}
+  urlFormControl = new FormControl('', [
+    Validators.required,
+    Validators.pattern(this.urlReg),
+  ]);
+
   matcher = new MyErrorStateMatcher();
 
-  onShorten(){
-    console.log(this.data);
+  onShorten() {
+    this.apiService
+      .post_api(this.data.originalUrl)
+      .subscribe((Res: any) => {
+        this.shortUrl = Res.shorten_url;
+      });
   }
 }
 
-
-class URLData{
+class URLData {
   constructor(
-    public originalUrl?: string,
-    public customUrl?: string
-  ) {}
+    public originalUrl: string,
+    public customUrl: string) {}
 }

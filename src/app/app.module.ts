@@ -19,6 +19,7 @@ import { SignupComponent } from './components/signup/signup.component';
 import { SigninComponent } from './components/signin/signin.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import Amplify, { Auth } from 'aws-amplify';
+import { HttpClientModule } from '@angular/common/http';
 
 Amplify.configure({
   Auth: {
@@ -54,6 +55,7 @@ Amplify.configure({
     ClipboardModule,
     MatCardModule,
     MatSlideToggleModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -11,6 +11,11 @@ import { Auth} from 'aws-amplify';
 export class SigninComponent implements OnInit{
   email: string = '';
   password: string = '';
+
+  OnSignIn(){
+    this.loginWithCognito();
+  }
+
   constructor(private router: Router) { }
   ngOnInit(): void {
   }

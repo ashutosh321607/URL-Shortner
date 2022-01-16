@@ -31,12 +31,21 @@ export class SignupComponent implements OnInit {
           email: this.email,
           name: this.name,
         },
-      });
+      }).then(
+        (data) => {
+          console.log('SignUp Success', data);
+          this.router.navigate(['/signin']);
+        }
+      )
       console.log({ user });
       alert('User signup completed , please check verify your email.');
-      this.router.navigate(['login']);
+      this.router.navigate(['signin']);
     } catch (error) {
       console.log('error signing up:', error);
     }
+  }
+
+  OnSignUpClick() {
+    this.register();
   }
 }

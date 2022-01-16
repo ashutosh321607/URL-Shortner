@@ -128,9 +128,9 @@ def post_profile_data():
   db.session.add(entry)
   db.session.commit()
   # logic for database entry
-  return "data has been entered"
+  return {'shorten_url': shorten_url}
 
 
 if __name__ == '__main__':
   db.create_all()
-  app.run(debug=True)
+  app.run(debug=True, host="localhost", port="3200")

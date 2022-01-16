@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-clipboard',
@@ -11,7 +11,6 @@ export class ClipboardComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
-  value = 'bit.ly/google';
+  @Input() value: string = "";
 
 }
