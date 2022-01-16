@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api
 import datetime
@@ -10,6 +10,8 @@ db = SQLAlchemy(app)
 # creating an API object
 api = Api(app)
 
+ERROR_404_NOT_FOUND_PAGE_URL = "localhost:4200/404"
+
 def get_shortan_url(url):
   short_url = get_random_url()
 
@@ -18,6 +20,14 @@ def get_shortan_url(url):
      short_url = get_random_url()
 
   return short_url
+
+def get_original_url_from_shorten_url(shorten_url):
+  # get original url from the database
+  return URLTable.query.filter_by(shorten_url=shorten_url).first().original_url
+
+
+def isAvailableShortenUrl(url):
+  return URLTable.query.filter_by(shorten_url=url).first() is None
 
 
 def convert_to_python_datetime(date_in):
@@ -49,6 +59,13 @@ class URLTable(db.Model):
 def home():
     return render_template("index.html")
 
+@app.route('/<id>')
+def url_redirect(id):
+  if not isAvailableShortenUrl(id):
+    original_url = get_original_url_from_shorten_url(id)
+    return redirect(original_url)
+  else:
+    return "URL doesn't end"
 
 @app.route("/get_profile_data", methods=['GET'])
 def get_profile_data():
@@ -63,7 +80,7 @@ def get_profile_data():
 
 
 @app.route("/post_profile_data", methods=['POST','GET'])
-def confirm():
+def post_profile_data():
   username = request.args.get("username")
   password = request.args.get("password")
   original_url = request.args.get("original_url")
@@ -80,7 +97,14 @@ def confirm():
       personalized = False
     else:
       personalized = True
-  shorten_url = get_shortan_url(original_url)
+  custom_shorten_url = request.args.get("custom_shorten_url")
+  if custom_shorten_url is None:
+    shorten_url = get_shortan_url(original_url)
+  else:
+    if isAvailableShortenUrl(custom_shorten_url):
+      shorten_url = custom_shorten_url
+    else:
+      raise Exception("URL not available")
   created_time = datetime.datetime.now()
   entry = URLTable(user_id=username, original_url=original_url, expire_time=expiry_time, created_time=created_time,
                     shorten_url=shorten_url, personalized=personalized)

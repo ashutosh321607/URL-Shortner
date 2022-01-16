@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, flash
 from flask_sqlalchemy import SQLAlchemy
 import datetime
-from utils import *
+from backend.utils import *
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cs559:password@localhost/db_testlearn'
@@ -9,13 +9,13 @@ db = SQLAlchemy(app)
 
 def get_shortan_url(url):
   short_url = get_random_url()
- 
+
   # check short_url is not already in the database
   while URLTable.query.filter_by(shorten_url=short_url).first() is not None:
      short_url = get_random_url()
-  
+
   return short_url
-  
+
 class URLTable(db.Model):
   __table_name__ ='urltable'
   # id = db.Column(db.Integer, primary_key=True)
