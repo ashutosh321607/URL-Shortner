@@ -105,7 +105,7 @@ def post_profile_data():
     else:
       personalized = True
   else:
-    personalized = request.args.get("personalized")
+    personalized = False
 
   custom_shorten_url = request.args.get("custom_shorten_url")
   if custom_shorten_url is None:
