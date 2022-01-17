@@ -6,14 +6,14 @@ import json
 from utils import *
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cs559:password@localhost/testdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user_milind:password@localhost/db_testlearn'
 db = SQLAlchemy(app)
 # creating an API object
 api = Api(app)
 
 ERROR_404_NOT_FOUND_PAGE_URL = "localhost:4200/404"
 
-# function to generate a random short url 
+# function to generate a random short url
 def generate_shorten_url():
   short_url = get_random_url()
   # check short_url is not already in the database
@@ -27,8 +27,8 @@ def get_shorten_url(url, personalized, username):
   if not personalized:
     # check if url exists
     data_original_urls = URLTable.query.filter_by(original_url=url).all()
-    
-    # if the url exist, we return a previously shortened url which is not created with personalised = True 
+
+    # if the url exist, we return a previously shortened url which is not created with personalised = True
     if data_original_urls != []:
         for row in data_original_urls:
           if row.personalized == False:
@@ -94,7 +94,7 @@ def get_profile_data():
     for item in user_data:
       profile_data_dic['original url'].append(item.original_url)
       profile_data_dic['shorten url'].append(item.shorten_url)
-    return Response(profile_data_dic, status=201)
+    return Response(json.dumps(profile_data_dic), status=201)
 
 
 @app.route("/post_profile_data", methods=['POST','GET'])
