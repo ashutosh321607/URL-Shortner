@@ -37,7 +37,7 @@ export class TextBoxComponent implements OnInit {
   changed() {
     this.isChecked = !this.isChecked;
   }
-  public data: URLData = new URLData("", "");
+  public data: URLData = new URLData('', '', '', '');
 
   constructor(public apiService: HandleApiService) {}
 
@@ -50,17 +50,36 @@ export class TextBoxComponent implements OnInit {
   matcher = new MyErrorStateMatcher();
 
   onShorten() {
-    this.apiService
-      .post_api(this.data.originalUrl)
-      .then((Res: any) => {
-        console.log(Res);
-        this.shortUrl = Res.shorten_url;
-      }).catch((err) => {console.log(err)});
+    if(this.isChecked===false){
+      this.apiService
+        .post_api(this.data.originalUrl, this.data.username, this.data.password)
+        .then((Res: any) => {
+          console.log(Res);
+          this.shortUrl = Res.data;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+    else{
+      this.apiService
+        .post_api_with_custom(this.data.originalUrl, this.data.username, this.data.password, this.data.customUrl)
+        .then((Res: any) => {
+          console.log(Res);
+          this.shortUrl = Res.data;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   }
 }
 
 class URLData {
   constructor(
     public originalUrl: string,
-    public customUrl: string) {}
+    public customUrl: string,
+    public username: string,
+    public password: string
+  ) {}
 }

@@ -4,13 +4,16 @@ from flask_restful import Resource, Api
 import datetime
 import json
 from utils import *
+import socket
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user_milind:password@localhost/db_testlearn'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cs559:password@localhost/testdb'
 db = SQLAlchemy(app)
 # creating an API object
 api = Api(app)
-
+host_name = socket.gethostname()
+host_ip = socket.gethostbyname(host_name)
+PORT = '5000'
 ERROR_404_NOT_FOUND_PAGE_URL = "localhost:4200/404"
 
 # function to generate a random short url
@@ -132,9 +135,9 @@ def post_profile_data():
   db.session.add(entry)
   db.session.commit()
   # logic for database entry
-  return Response(json.dumps({'shorten_url': shorten_url}), status=200)
+  return Response(json.dumps({'data': f'{host_ip}:{PORT}/{shorten_url}'}), status=200)
 
 
 if __name__ == '__main__':
   db.create_all()
-  app.run(debug=True, host="localhost", port="5000")
+  app.run(debug=True, host=host_ip, port="5000")
