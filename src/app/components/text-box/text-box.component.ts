@@ -52,9 +52,10 @@ export class TextBoxComponent implements OnInit {
   onShorten() {
     this.apiService
       .post_api(this.data.originalUrl)
-      .subscribe((Res: any) => {
+      .then((Res: any) => {
+        console.log(Res);
         this.shortUrl = Res.shorten_url;
-      });
+      }).catch((err) => {console.log(err)});
   }
 }
 

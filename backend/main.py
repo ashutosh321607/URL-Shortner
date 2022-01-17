@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request, flash, redirect
+from flask import Flask, render_template, request, flash, redirect, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api
 import datetime
+import json
 from utils import *
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user_milind:password@localhost/db_testlearn'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://cs559:password@localhost/testdb'
 db = SQLAlchemy(app)
 # creating an API object
 api = Api(app)
@@ -31,8 +32,11 @@ def get_shorten_url(url, personalized, username):
     if data_original_urls != []:
         for row in data_original_urls:
           if row.personalized == False:
-            short_url = row.shorten_url
-            return short_url
+            if str(row.user_id) == str(username):
+              pass
+            else:
+              short_url = row.shorten_url
+              return short_url
     short_url = generate_shorten_url()
     # else generate a new url
   else:
@@ -79,7 +83,7 @@ def url_redirect(id):
     original_url = get_original_url_from_shorten_url(id)
     return redirect(original_url)
   else:
-    return "URL doesn't exist"
+    return Response("URL doesn't exist", status=400)
 
 @app.route("/get_profile_data", methods=['GET'])
 def get_profile_data():
@@ -90,7 +94,7 @@ def get_profile_data():
     for item in user_data:
       profile_data_dic['original url'].append(item.original_url)
       profile_data_dic['shorten url'].append(item.shorten_url)
-    return profile_data_dic
+    return Response(profile_data_dic, status=201)
 
 
 @app.route("/post_profile_data", methods=['POST','GET'])
@@ -110,7 +114,7 @@ def post_profile_data():
     else:
       personalized = True
   else:
-    personalized = False
+    personalized = True
 
   custom_shorten_url = request.args.get("custom_shorten_url")
   if custom_shorten_url is None:
@@ -119,18 +123,18 @@ def post_profile_data():
     if isAvailableShortenUrl(custom_shorten_url):
       shorten_url = custom_shorten_url
     else:
-      raise Exception("URL not available")
+      return Response(json.dumps({"data": "URL not available"}), status=400)
   created_time = datetime.datetime.now()
   if shorten_url == '':
-    return 'you already have shortened url for the requested url'
+    return Response(json.dumps({"data": "You Already Have Shortened this URL"}), status = 400)
   entry = URLTable(user_id=username, original_url=original_url, expire_time=expiry_time, created_time=created_time,
                     shorten_url=shorten_url, personalized=personalized)
   db.session.add(entry)
   db.session.commit()
   # logic for database entry
-  return {'shorten_url': shorten_url}
+  return Response(json.dumps({'shorten_url': shorten_url}), status=200)
 
 
 if __name__ == '__main__':
   db.create_all()
-  app.run(debug=True, host="localhost", port="3200")
+  app.run(debug=True, host="localhost", port="5000")
