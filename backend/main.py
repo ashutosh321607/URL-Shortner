@@ -1,8 +1,7 @@
-from flask import Flask, render_template, request, flash, redirect, jsonify, Response
+from flask import Flask, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api, reqparse, abort
 import datetime
-import json
 from utils import *
 import socket
 
