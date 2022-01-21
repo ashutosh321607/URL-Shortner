@@ -1,5 +1,8 @@
 import random
 import datetime
+import boto3
+from flask import render_template
+from mail_sender import send_email
 
 # function to generate a random string of length 6 with characters from a-zA-Z0-9
 def get_random_string(length):  
@@ -12,5 +15,4 @@ def generate_otp():
 
 def send_email_with_otp(email, otp):
     # send email with otp using aws ses
-    pass
-    
+    send_email(email, otp)

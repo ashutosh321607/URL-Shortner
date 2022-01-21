@@ -133,7 +133,8 @@ class RegisterUser(Resource):
         
         # check if user had requested to register before delete that request
         if UnvarifiedUserModel.query.filter_by(email=args.email).first():
-            UnvarifiedUserModel.query.filter_by(email=args.email).first().delete()
+            user = UnvarifiedUserModel.query.filter_by(email=args.email).first()
+            db.session.delete(user)
         
         # generate otp and send email
         otp = generate_otp()
@@ -146,6 +147,7 @@ class RegisterUser(Resource):
         
         # generate api key
         user.api_key = get_random_string(length=API_KEY_LENGTH)
+        user.varifiation_otp = otp
         while UserModel.query.filter_by(api_key=user.api_key).first() is not None:
             user.api_key = get_random_string(length=API_KEY_LENGTH)
 
@@ -167,10 +169,10 @@ class VerifyUser(Resource):
             abort(http_status_code=400, message="OTP is invalid")
         
         user = UserModel(email=entry.email, full_name=entry.full_name, password=entry.password, api_key=entry.api_key)
-        UnvarifiedUserModel.query.filter_by(email=args.email).delete()
+        db.session.delete(UnvarifiedUserModel.query.filter_by(email=args.email))
         db.session.add(user)
         db.session.commit()
-        return {'api_key': user.api_key}, 201
+        return {'api_key': entry.api_key}, 201
         
 
 
@@ -240,9 +242,9 @@ api.add_resource(VerifyUser, '/api/verify')
 #     return URLTable.query.filter_by(shorten_url=shorten_url).first().long_url
 
 
-# @app.route('/', methods=['POST', 'GET'])
-# def home():
-#     return render_template("index.html")
+@app.route('/', methods=['GET'])
+def home():
+    return render_template("index.html")
 
 
 # @app.route("/get_profile_data", methods=['GET'])
