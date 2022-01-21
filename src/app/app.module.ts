@@ -18,18 +18,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SignupComponent } from './components/signup/signup.component';
 import { SigninComponent } from './components/signin/signin.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
-import Amplify, { Auth } from 'aws-amplify';
 import { HttpClientModule } from '@angular/common/http';
-
-Amplify.configure({
-  Auth: {
-    mandatorySignIn: true,
-    region: 'ap-south-1',
-    userPoolId: 'ap-south-1_dtuSSUhxg',
-    userPoolWebClientId: '67q3k6h8j5uq31r5ouicsel9b1',
-    authenticationFlowType: 'ALLOW_REFRESH_TOKEN_AUTH',
-  },
-});
 
 @NgModule({
   declarations: [
