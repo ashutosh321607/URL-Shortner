@@ -5,6 +5,9 @@ import datetime
 from utils import *
 import socket
 
+# -------------------------------------------------
+# Global variables
+
 app = Flask(__name__)
 api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/database.db'
@@ -18,6 +21,8 @@ PORT = '5000'
 SHORT_URL_LENGTH = 6
 API_KEY_LENGTH = 32
 
+# -------------------------------------------------
+# Database models
 
 class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,6 +55,9 @@ class URLModel(db.Model):
     def __repr__(self):
         return f"URLModel(id = {self.id}, user_id = {self.user_id}, long_url = {self.long_url}, short_url = {self.short_url}, expire_time = {self.expire_time}, created_time = {self.created_time})"
 
+# ------------------------------------------------------
+# API class for feature
+
 # argument parser for shorten url
 url_post_args = reqparse.RequestParser()
 url_post_args.add_argument(
@@ -61,6 +69,30 @@ url_post_args.add_argument(
 url_post_args.add_argument('time_period', type=int,
                            required=False, help='time period optional')
 
+
+# argument parser for update short url
+url_update_args = reqparse.RequestParser()
+url_update_args.add_argument(
+    'short_url', type=str, required=True, help='short url is required')
+url_update_args.add_argument(
+    'api_key', type=str, required=True, help='api key is required')
+url_update_args.add_argument('new_short_url', type=str, required=True, help='new short url is required')
+url_update_args.add_argument('extend_time', type=int, required=False, help='extend time optional')
+
+
+# argument parser for get short url info
+url_get_args = reqparse.RequestParser()
+url_get_args.add_argument(
+    'short_url', type=str, required=True, help='short url is required')
+url_get_args.add_argument(
+    'api_key', type=str, required=True, help='api key is required')
+
+# argument parser for delete short url
+url_delete_args = reqparse.RequestParser()
+url_delete_args.add_argument(
+    'short_url', type=str, required=True, help='short url is required')
+url_delete_args.add_argument(
+    'api_key', type=str, required=True, help='api key is required')
 
 
 
@@ -112,6 +144,51 @@ class ShortURL(Resource):
         db.session.add(url)
         db.session.commit()
         return {'short_url': f"http://{host_public_ip}:{PORT}/{url.short_url}"}, 201
+
+    def patch(self):
+        args = url_update_args.parse_args()
+        user_id = get_user_id_from_api_key(args['api_key'])
+        if user_id is None:
+            abort(http_status_code=401, message="Unauthorized / Invalid API Key")
+        if URLModel.query.filter_by(short_url=args.short_url).filter_by(user_id=user_id).first() is None:
+            abort(http_status_code=404, message="URL not found in your account")
+        url = URLModel.query.filter_by(short_url=args.short_url).filter_by(user_id=user_id).first()
+        url.short_url = args.new_short_url
+        if args.extend_time:
+            url.expire_time += datetime.timedelta(seconds=args.extend_time)
+        db.session.commit()
+        return {'short_url': f"http://{host_public_ip}:{PORT}/{url.short_url}"}, 200
+    
+    def get(self):
+        args = url_get_args.parse_args()
+        user_id = get_user_id_from_api_key(args['api_key'])
+        if user_id is None:
+            abort(http_status_code=401, message="Unauthorized / Invalid API Key")
+        if URLModel.query.filter_by(short_url=args.short_url).filter_by(user_id=user_id).first() is None:
+            abort(http_status_code=404, message="URL not found in your account")
+        url = URLModel.query.filter_by(short_url=args.short_url).filter_by(user_id=user_id).first()
+        return {
+            'short_url' : f"http://{host_public_ip}:{PORT}/{url.short_url}",
+            'long_url' : url.long_url,
+            'expirt_time' : url.expire_time,
+            'created_time' : url.created_time
+        }, 200
+        
+    def delete(self):
+        args = url_delete_args.parse_args()
+        user_id = get_user_id_from_api_key(args['api_key'])
+        if user_id is None:
+            abort(http_status_code=401, message="Unauthorized / Invalid API Key")
+        if URLModel.query.filter_by(short_url=args.short_url).filter_by(user_id=user_id).first() is None:
+            abort(http_status_code=404, message="URL not found in your account")
+        url = URLModel.query.filter_by(short_url=args.short_url).filter_by(user_id=user_id).first()
+        db.session.delete(url)
+        db.commit()
+        return {'message': 'URL deleted'}, 200
+        
+
+# ----------------------------------------------------------------------------------------------------------------------
+# API classes for Authentication
 
 
 # argument parser for register user
@@ -203,12 +280,24 @@ def url_redirect(shortlink):
         return redirect(f"{host_public_ip}:{PORT}/404")
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# API endpoints
+
+# analytics
+
+
+
+# feat
 api.add_resource(ShortURL, '/api/shorten')
-api.add_resource(loginUser, '/api/login')
-api.add_resource(RegisterUser, '/api/register')
-api.add_resource(VerifyUser, '/api/verify')
 
 
+# auth
+api.add_resource(loginUser, '/api/auth/login')
+api.add_resource(RegisterUser, '/api/auth/register')
+api.add_resource(VerifyUser, '/api/auth/verify')
+
+# ---------------------------------------------------------------------------------------------------------------------- 
+   
 # # funciton get shorten url for a url given by user
 
 
@@ -256,7 +345,8 @@ def home():
 #     for item in user_data:
 #         profile_data_dic['original url'].append(item.long_url)
 #         profile_data_dic['shorten url'].append(item.shorten_url)
-#     return Response(json.dumps(profile_data_dic), status=201)
+#     return Response(json.dumps(    # db.drop_all()
+    # db.create_all()profile_data_dic), status=201)
 
 
 # @app.route("/post_profile_data", methods=['POST', 'GET'])
@@ -301,4 +391,4 @@ def home():
 if __name__ == '__main__':
     # db.drop_all()
     # db.create_all()
-    app.run(debug=True, host=host_public_ip, port="5000")
+    app.run(debug=True, host='0.0.0.0', port="5000")
