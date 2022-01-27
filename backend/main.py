@@ -7,7 +7,7 @@ import socket
 
 app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user_milind:password@localhost/db_testlearn'
 db = SQLAlchemy(app)
 
 host_name = socket.gethostname()
@@ -28,7 +28,7 @@ class UserModel(db.Model):
 
     def __repr__(self):
         return f"User('{self.email}', '{self.full_name}', '{self.password}', '{self.api_key}')"
-    
+
 
 class UnvarifiedUserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,6 +50,13 @@ class URLModel(db.Model):
     def __repr__(self):
         return f"URLModel(id = {self.id}, user_id = {self.user_id}, long_url = {self.long_url}, short_url = {self.short_url}, expire_time = {self.expire_time}, created_time = {self.created_time})"
 
+class ReadWriteCount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    WriteCount = db.Column(db.Integer)
+    ReadCount=db.Column(db.Integer)
+    SucWriteCount = db.Column(db.Integer)
+    SucReadCount = db.Column(db.Integer)
+
 # argument parser for shorten url
 url_post_args = reqparse.RequestParser()
 url_post_args.add_argument(
@@ -62,6 +69,30 @@ url_post_args.add_argument('time_period', type=int,
                            required=False, help='time period optional')
 
 
+## Helper function for statistics of succesful writes/reads. Write is when user shortens a url. Read is when we are given a shortened url and need to redirect or when user wants to see his urls.
+def Increment_Counter_Request(type_,sucFlag=False):
+    counts = ReadWriteCount.query.all()
+    firstTime = False
+    ##initialize database if empty
+    if counts == []:
+        firstTime = True
+        row = ReadWriteCount(ReadCount = 0, WriteCount = 0, SucReadCount = 0, SucWriteCount = 0)
+    else:
+        row = counts[0]
+    if type_.lower() == 'read':
+        row.ReadCount += 1
+        ##Check if successful
+        if sucFlag:
+            row.SucReadCount += 1
+    if type_.lower() == 'write':
+        row.WriteCount += 1
+        ##Check if successful
+        if sucFlag:
+            row.SucWriteCount += 1
+    if firstTime:
+        db.session.add(row)
+    db.session.commit()
+    return True
 
 
 def get_user_id_from_api_key(api_key):
@@ -79,39 +110,51 @@ def generate_shorten_url():
 
 
 class ShortURL(Resource):
+    ##putting post in try catch block to get all possible errors such as storage exceeded, server side, etc., when user writes.
     def post(self):
-        # cool down if user is trying to post too many urls
-        # need to be added
+        try:
+            # cool down if user is trying to post too many urls
+            # need to be added
 
-        args = url_post_args.parse_args()
-        user_id = get_user_id_from_api_key(args['api_key'])
-        if user_id is None:
-            abort(http_status_code=401, message="Unauthorized / Invalid API Key")
-        url = URLModel(user_id=user_id, long_url=args.long_url,
-                       created_time=datetime.datetime.now())
+            args = url_post_args.parse_args()
+            user_id = get_user_id_from_api_key(args['api_key'])
+            if user_id is None:
+                ## Failiure Write Request
+                Increment_Counter_Request('write',False)
+                abort(http_status_code=401, message="Unauthorized / Invalid API Key")
+            url = URLModel(user_id=user_id, long_url=args.long_url,
+                           created_time=datetime.datetime.now())
 
-        # if the user has shorten the long url before
-        if URLModel.query.filter_by(long_url=args.long_url).filter_by(user_id=user_id).first() is not None:
-            abort(http_status_code=409, message=f"URL already shortened", link=f"http://{host_public_ip}:{PORT}/{URLModel.query.filter_by(long_url=args.long_url).filter_by(user_id=user_id).first().short_url}")
+            # if the user has shorten the long url before
+            if URLModel.query.filter_by(long_url=args.long_url).filter_by(user_id=user_id).first() is not None:
+                ## Failiure Write Request
+                Increment_Counter_Request('write',False)
+                abort(http_status_code=409, message=f"URL already shortened", link=f"http://{host_public_ip}:{PORT}/{URLModel.query.filter_by(long_url=args.long_url).filter_by(user_id=user_id).first().short_url}")
 
 
-        if args.short_url:
-            # check if short url is unique
-            if URLModel.query.filter_by(short_url=args.short_url).first():
-                abort(http_status_code=400, message="Short URL is already taken")
-            url.short_url = args.short_url
-        else:
-            url.short_url = generate_shorten_url()
+            if args.short_url:
+                # check if short url is unique
+                if URLModel.query.filter_by(short_url=args.short_url).first():
+                    ## Failiure write request
+                    Increment_Counter_Request('write', False)
+                    abort(http_status_code=400, message="Short URL is already taken")
+                url.short_url = args.short_url
+            else:
+                url.short_url = generate_shorten_url()
 
-        if args.time_period:
-            url.expire_time = datetime.datetime.now(
-            ) + datetime.timedelta(seconds=args.time_period)
-        else:
-            url.expire_time = datetime.datetime.now() + datetime.timedelta(days=1)
+            if args.time_period:
+                url.expire_time = datetime.datetime.now(
+                ) + datetime.timedelta(seconds=args.time_period)
+            else:
+                url.expire_time = datetime.datetime.now() + datetime.timedelta(days=1)
 
-        db.session.add(url)
-        db.session.commit()
-        return {'short_url': f"http://{host_public_ip}:{PORT}/{url.short_url}"}, 201
+            db.session.add(url)
+            db.session.commit()
+            ## Succesful Write Request
+            Increment_Counter_Request('write', True)
+            return {'short_url': f"http://{host_public_ip}:{PORT}/{url.short_url}"}, 201
+        except:
+            Increment_Counter_Request('write',False)
 
 
 # argument parser for register user
@@ -130,21 +173,21 @@ class RegisterUser(Resource):
         # check if user already exists
         if UserModel.query.filter_by(email=args.email).first():
             abort(http_status_code=400, message="User already exists")
-        
+
         # check if user had requested to register before delete that request
         if UnvarifiedUserModel.query.filter_by(email=args.email).first():
             user = UnvarifiedUserModel.query.filter_by(email=args.email).first()
             db.session.delete(user)
-        
+
         # generate otp and send email
         otp = generate_otp()
-        
+
         # send email
         try:
             send_email_with_otp(email=args.email, otp=otp)
         except Exception as e:
             abort(http_status_code=500, message="Internal Server Error")
-        
+
         # generate api key
         user.api_key = get_random_string(length=API_KEY_LENGTH)
         user.varifiation_otp = otp
@@ -167,13 +210,13 @@ class VerifyUser(Resource):
         # check if otp and email is valid
         if entry is None:
             abort(http_status_code=400, message="OTP is invalid")
-        
+
         user = UserModel(email=entry.email, full_name=entry.full_name, password=entry.password, api_key=entry.api_key)
         db.session.delete(UnvarifiedUserModel.query.filter_by(email=args.email))
         db.session.add(user)
         db.session.commit()
         return {'api_key': entry.api_key}, 201
-        
+
 
 
 # argument parser for login user
@@ -196,11 +239,18 @@ class loginUser(Resource):
 # url redirection to long url
 @app.route('/<shortlink>')
 def url_redirect(shortlink):
-    if URLModel.query.filter_by(short_url=shortlink).first() is not None:
-        long_url = URLModel.query.filter_by(short_url=shortlink).first().long_url
-        return redirect(long_url)
-    else:
-        return redirect(f"{host_public_ip}:{PORT}/404")
+    ## Putting in try except to keep track of succesful redirections.
+    try:
+        if URLModel.query.filter_by(short_url=shortlink).first() is not None:
+            long_url = URLModel.query.filter_by(short_url=shortlink).first().long_url
+            ##succesful url redirection
+            Increment_Counter_Request('read', True)
+            return redirect(long_url)
+        else:
+            Increment_Counter_Request('read', True)
+            return redirect(f"{host_public_ip}:{PORT}/404")
+    except:
+        Increment_Counter_Request('read', False)
 
 
 api.add_resource(ShortURL, '/api/shorten')
@@ -208,8 +258,16 @@ api.add_resource(loginUser, '/api/login')
 api.add_resource(RegisterUser, '/api/register')
 api.add_resource(VerifyUser, '/api/verify')
 
-
 # # funciton get shorten url for a url given by user
+
+
+## APIs for analytics:
+class GetReadWriteStats(Resource):
+    def get(self):
+        row = ReadWriteCount.query.all()
+        return row, 200
+
+api.add_resource(GetReadWriteStats, '/api/analytics/readwrite/')
 
 
 # def get_shorten_url(url, personalized, username):
@@ -300,5 +358,5 @@ def home():
 
 if __name__ == '__main__':
     # db.drop_all()
-    # db.create_all()
+    db.create_all()
     app.run(debug=True, host=host_public_ip, port="5000")
