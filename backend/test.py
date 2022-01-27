@@ -13,6 +13,6 @@ API_KEY = "lZOoW2laje2JQ04gwQeaV6ET4dqFn70X"
 # response = requests.post(BASE + "/api/login", {
 #                           "email": "gorocal651@icesilo.com", "password": "ashutosh"})
 
-# response = requests.post(BASE + "/api/shorten", {'api_key': API_KEY,
-#                         'long_url': "https://google.com", 'time_period': 300})
+response = requests.post(BASE + "/api/shorten", {'api_key': API_KEY,
+                        'long_url': "https://google.com", 'time_period': 300})
 print(response.json())
