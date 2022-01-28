@@ -13,7 +13,13 @@ export class HandleApiService {
 
   post_api(original_url: string, username: string, password: string) {
     const api_url = `/post_profile_data?username=${username}&password=${password}&original_url=${original_url}` ;
+    var startTime = performance.now()
     const promise = this.http.get(api_url).toPromise();
+    var endTime = performance.now()
+    var difference = endTime - startTime
+    var id = ''
+    var type = 'random'
+    const analysis_api = `/api/analytics/postservetime?type=${type}&id=${id}&difference=${difference}`
     return promise;
   }
 
